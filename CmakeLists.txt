@@ -1,35 +1,56 @@
+# Generated Cmake Pico project file
+
 cmake_minimum_required(VERSION 3.13)
 
-# initialize the SDK based on PICO_SDK_PATH
-# note: this must happen before project()
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+# Initialise pico_sdk from installed location
+# (note this can come from environment, CMake cache etc)
+
+# == DO NOT EDIT THE FOLLOWING LINES for the Raspberry Pi Pico VS Code Extension to work ==
+if(WIN32)
+    set(USERHOME $ENV{USERPROFILE})
+else()
+    set(USERHOME $ENV{HOME})
+endif()
+set(sdkVersion 2.1.0)
+set(toolchainVersion 13_3_Rel1)
+set(picotoolVersion 2.1.0)
+set(picoVscode ${USERHOME}/.pico-sdk/cmake/pico-vscode.cmake)
+if (EXISTS ${picoVscode})
+    include(${picoVscode})
+endif()
+# ====================================================================================
+set(PICO_BOARD pico_w CACHE STRING "Board type")
+
+# Pull in Raspberry Pi Pico SDK (must be before project)
 include(pico_sdk_import.cmake)
 
-set(PROJECT_NAME "hello_world")
-set(PICO_BOARD "pico_w")
+project(hello_world C CXX ASM)
 
-project(${PROJECT_NAME})
-
-# initialize the Raspberry Pi Pico SDK
+# Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
 
-# rest of your project
-add_executable(${PROJECT_NAME}
-    ${PROJECT_NAME}.c
-)
+# Add executable. Default name is the project name, version 0.1
 
-# Add pico_stdlib library which aggregates commonly used features
-target_link_libraries(${PROJECT_NAME} pico_stdlib)
+if (TARGET tinyusb_device)
+    add_executable(hello_world
+            hello_world.c
+            )
 
-# enable usb output, disable uart output
-pico_enable_stdio_usb(${PROJECT_NAME} 1)
-pico_enable_stdio_uart(${PROJECT_NAME} 0)
+    # pull in common dependencies
+    target_link_libraries(hello_world pico_stdlib)
 
-# create map/bin/hex/uf2 file in addition to ELF.
-pico_add_extra_outputs(${PROJECT_NAME})
+    # enable usb output, disable uart output
+    pico_enable_stdio_usb(hello_world 1)
+    pico_enable_stdio_uart(hello_world 0)
 
-add_custom_target(flash
-    COMMAND picotool help
-#    COMMAND picotool load -F ${PROJECT_NAME}.uf2 && picotool reboot
-#    DEPENDS ${PROJECT_NAME}
-#    COMMENT "Flashing ${PROJECT_NAME}.uf2"
-)
+    # create map/bin/hex/uf2 file etc.
+    pico_add_extra_outputs(hello_world)
+
+    # add url via pico_set_program_url
+elseif(PICO_ON_DEVICE)
+    message("Skipping hello_world because TinyUSB submodule is not initialized in the SDK")
+endif()
