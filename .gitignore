@@ -33,3 +33,5 @@
 
 # build files
 /build/*
+/user_interface/bin/*
+/user_interface/obj/*
