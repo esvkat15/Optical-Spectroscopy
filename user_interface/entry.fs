@@ -31,7 +31,7 @@ while true do
     Console.WriteLine "test"
     let message = (port.ReadLine ())
     Console.WriteLine message
-    File.WriteAllText ("hello.txt", message)
+    File.WriteAllText ("output/hello.txt", message)
   with
     _ -> Console.WriteLine "no message"
 
