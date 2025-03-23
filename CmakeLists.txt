@@ -28,7 +28,7 @@ set(PICO_BOARD pico_w CACHE STRING "Board type")
 # Pull in Raspberry Pi Pico SDK (must be before project)
 include(pico_sdk_import.cmake)
 
-project(hello_world C CXX ASM)
+project(optics_device_main C CXX ASM)
 
 # Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
@@ -36,21 +36,21 @@ pico_sdk_init()
 # Add executable. Default name is the project name, version 0.1
 
 if (TARGET tinyusb_device)
-    add_executable(hello_world
-            hello_world.c
+    add_executable(optics_device_main
+            optics_device_main.c
             )
 
     # pull in common dependencies
-    target_link_libraries(hello_world pico_stdlib)
+    target_link_libraries(optics_device_main pico_stdlib pico_time hardware_adc hardware_i2c hardware_spi)
 
     # enable usb output, disable uart output
-    pico_enable_stdio_usb(hello_world 1)
-    pico_enable_stdio_uart(hello_world 0)
+    pico_enable_stdio_usb(optics_device_main 1)
+    pico_enable_stdio_uart(optics_device_main 0)
 
     # create map/bin/hex/uf2 file etc.
-    pico_add_extra_outputs(hello_world)
+    pico_add_extra_outputs(optics_device_main)
 
     # add url via pico_set_program_url
 elseif(PICO_ON_DEVICE)
-    message("Skipping hello_world because TinyUSB submodule is not initialized in the SDK")
+    message("Skipping optics_device_main because TinyUSB submodule is not initialized in the SDK")
 endif()
