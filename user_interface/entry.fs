@@ -4,6 +4,10 @@ open System.IO.Ports
 
 // use "dotnet run" from this folder to build and run project
 
+(*let pico_repl (portName: string) =
+  while true do
+  *)  
+
 let ports = (SerialPort.GetPortNames ())
 for p in ports do
   printfn "ports: %A" p
@@ -19,6 +23,13 @@ port.RtsEnable   <- true
 port.ReadTimeout <- 3000
 //port.WriteTimeout <- 3000
 
+let port_command cmd fn =
+  port.WriteLine cmd
+  Console.WriteLine cmd
+  let message = (port.ReadLine ())
+  Console.WriteLine message
+  File.WriteAllText (fn, message)
+
 while true do
   try
     let message = (port.ReadLine ())
@@ -27,11 +38,8 @@ while true do
     Console.WriteLine "picoack"
     let message = (port.ReadLine ())
     Console.WriteLine message
-    port.WriteLine "test"
-    Console.WriteLine "test"
-    let message = (port.ReadLine ())
-    Console.WriteLine message
-    File.WriteAllText ("output/hello.txt", message)
+    port_command "test" "output/hello.txt"
+    port_command "spi_test" "output/hello_spi.txt"
   with
     _ -> Console.WriteLine "no message"
 
