@@ -6,6 +6,7 @@
 #include "hardware/adc.h"
 #include "hardware/i2c.h"
 #include "hardware/spi.h"
+#include "peripherals/digipot.h"
 
 // gpio pins
 #define RED_LED             6
@@ -25,10 +26,6 @@
 
 // i2c addresses
 #define i2c_cam_addr        0x3C
-#define i2c_discharge0_addr 0x2C
-#define i2c_discharge1_addr 0x2D
-#define i2c_charge1_addr    0x2E
-#define i2c_charge2_addr    0x2F
 
 // spi registers
 #define spi_write_bit       0x80
@@ -76,8 +73,15 @@ int main() {
 
                     printf("Hello World!\n");
 
-                }
-                if(!strcmp(command, "spi_test")) {
+                } else if(!strcmp(command, "adc_test")) {
+
+                    adc_select_input(0);
+                    uint16_t result0 = adc_read();
+                    adc_select_input(1);
+                    uint16_t result1 = adc_read();
+                    printf("adc0: 0x%03hX, adc1: 0x%03hX\n", result0, result1);
+
+                } else if(!strcmp(command, "spi_test")) {
 
                     // write 0xAA to register 0x00
                     uint8_t x = spi_cam_read(spi_reg_test);
@@ -85,13 +89,46 @@ int main() {
                     uint8_t y = spi_cam_read(spi_reg_test);
                     printf("test reg before: 0x%02hhX, after write: 0x%02hhX\n", x, y);
 
+                } else if(!strcmp(command, "i2c_test")) {
+
+                    // todo
+                    adc_select_input(1);
+                    int ret = digipot_w(i2c_discharge0_bits, 0x01, 0x00);
+                    if(ret) {
+                        printf("write1 failed\n");
+                    }
+                    sleep_ms(500);
+                    uint16_t result = adc_read();
+                    sleep_ms(500);
+                    printf("read1: 0x%03hX, ", result);
+                    ret = digipot_w(i2c_discharge0_bits, 0x01, 0x3F);
+                    if(ret) {
+                        printf("write2 failed\n");
+                    }
+                    sleep_ms(500);
+                    result = adc_read();
+                    sleep_ms(500);
+                    printf("read2: 0x%03hX, ", result);
+                    ret = digipot_w(i2c_discharge0_bits, 0x01, 0x3F >> 1);
+                    if(ret) {
+                        printf("write3 failed\n");
+                    }
+                    sleep_ms(500);
+                    result = adc_read();
+                    sleep_ms(500);
+                    printf("read3: 0x%03hX\n", result);
+
+                } else if(!strcmp(command, "read_image")) {
+
+                    //
+
+                } else {
+
+                    printf("unrecognized command\n");
+
                 }
 
             }
-            /*sleep_ms(1000);
-            gpio_put(6, 1);
-            sleep_ms(1000);
-            gpio_put(6, 0);*/
 
         }
 

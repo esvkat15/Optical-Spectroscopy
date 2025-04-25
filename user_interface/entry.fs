@@ -13,7 +13,7 @@ for p in ports do
   printfn "ports: %A" p
 
 // manually change this to the port the pico is on
-let portname = "COM4"
+let portname = ports.[0]
 
 let port = new SerialPort (portname, 115200, Parity.None, 8, StopBits.One)
 
@@ -40,6 +40,8 @@ while true do
     Console.WriteLine message
     port_command "test" "output/hello.txt"
     port_command "spi_test" "output/hello_spi.txt"
+    port_command "i2c_test" "output/hello_i2c.txt"
+    port_command "adc_test" "output/hello_adc.txt"
   with
     _ -> Console.WriteLine "no message"
 
