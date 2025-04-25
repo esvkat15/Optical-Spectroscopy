@@ -95,7 +95,7 @@ int main() {
                     adc_select_input(1);
                     int ret = digipot_w(i2c_discharge0_bits, 0x01, 0x00);
                     if(ret) {
-                        printf("write1 failed\n");
+                        printf("|write1 failed|");
                     }
                     sleep_ms(500);
                     uint16_t result = adc_read();
@@ -103,7 +103,7 @@ int main() {
                     printf("read1: 0x%03hX, ", result);
                     ret = digipot_w(i2c_discharge0_bits, 0x01, 0x3F);
                     if(ret) {
-                        printf("write2 failed\n");
+                        printf("|write2 failed|");
                     }
                     sleep_ms(500);
                     result = adc_read();
@@ -111,7 +111,7 @@ int main() {
                     printf("read2: 0x%03hX, ", result);
                     ret = digipot_w(i2c_discharge0_bits, 0x01, 0x3F >> 1);
                     if(ret) {
-                        printf("write3 failed\n");
+                        printf("|write3 failed|");
                     }
                     sleep_ms(500);
                     result = adc_read();
@@ -212,13 +212,18 @@ void hw_setup() {
 
         gpio_init(i);
         gpio_set_dir(i, GPIO_OUT);
-        if(i < VOLTAGE_SW)
+        if(i < VOLTAGE_SW) {
 
             gpio_put(i, 0);
+            gpio_pull_down(i);
+
+        }
 
     }
     gpio_put(VOLTAGE_SW, 1);
+    gpio_pull_up(VOLTAGE_SW);
     gpio_put(VOLTAGE_ADJ_PIN, 1);
+    gpio_pull_up(VOLTAGE_ADJ_PIN);
 
     // init adc
     // adc0 -> voltage across shunt resistor

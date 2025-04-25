@@ -20,7 +20,7 @@ let port = new SerialPort (portname, 115200, Parity.None, 8, StopBits.One)
 port.Open ()
 port.DtrEnable   <- true
 port.RtsEnable   <- true
-port.ReadTimeout <- 3000
+port.ReadTimeout <- 4000
 //port.WriteTimeout <- 3000
 
 let port_command cmd fn =
