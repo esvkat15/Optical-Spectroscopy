@@ -39,7 +39,7 @@ while true do
     let message = (port.ReadLine ())
     Console.WriteLine message
     port_command "test" "output/hello.txt"
-    port_command "spi_test" "output/hello_spi.txt"
+    //port_command "spi_test" "output/hello_spi.txt"
     port_command "i2c_test" "output/hello_i2c.txt"
     port_command "adc_test" "output/hello_adc.txt"
   with
