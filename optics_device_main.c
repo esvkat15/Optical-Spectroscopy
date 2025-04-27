@@ -63,7 +63,7 @@ int main() {
         while(1) {
 
             char command[100];
-            absolute_time_t t = make_timeout_time_ms(60 * 60 * 1000);
+            absolute_time_t t = make_timeout_time_ms(15 * 1000);
             sleep_ms(50);
             int r = stdio_get_until(command, 100, t);
             if(r != PICO_ERROR_TIMEOUT) {
@@ -81,7 +81,7 @@ int main() {
                     uint16_t result1 = adc_read();
                     printf("adc0: 0x%03hX, adc1: 0x%03hX\n", result0, result1);
 
-                /*} else if(!strcmp(command, "spi_test")) {
+                } else if(!strcmp(command, "spi_test")) {
 
                     // write 0xAA to register 0x00
                     uint8_t x = spi_cam_read(spi_reg_test);
@@ -89,7 +89,7 @@ int main() {
                     uint8_t y = spi_cam_read(spi_reg_test);
                     printf("test reg before: 0x%02hhX, after write: 0x%02hhX\n", x, y);
 
-                */} else if(!strcmp(command, "i2c_test")) {
+                } else if(!strcmp(command, "i2c_test")) {
 
                     // todo
                     adc_select_input(1);
@@ -128,7 +128,7 @@ int main() {
 
                 }
 
-            }
+            } else break;
 
         }
 
