@@ -20,7 +20,7 @@ let port = new SerialPort (portname, 115200, Parity.None, 8, StopBits.One)
 port.Open ()
 port.DtrEnable   <- true
 port.RtsEnable   <- true
-port.ReadTimeout <- 4000
+port.ReadTimeout <- 15 * 1000
 //port.WriteTimeout <- 3000
 
 let port_command cmd fn =
@@ -42,6 +42,7 @@ while true do
     //port_command "spi_test" "output/hello_spi.txt"
     port_command "i2c_test" "output/hello_i2c.txt"
     port_command "adc_test" "output/hello_adc.txt"
+    port_command "led_test" "output/hello_led.txt"
   with
     _ -> Console.WriteLine "no message"
 

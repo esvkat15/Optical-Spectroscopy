@@ -6,7 +6,11 @@
 #include "hardware/adc.h"
 #include "hardware/i2c.h"
 #include "hardware/spi.h"
+#include "hardware/pwm.h"
 #include "peripherals/digipot.h"
+#include "peripherals/leds.h"
+#include "peripherals/camera.h"
+#include "peripherals/cell_ctrl.h"
 
 // gpio pins
 #define RED_LED             6
@@ -17,6 +21,9 @@
 #define DISCHARGE_SW        11
 #define VOLTAGE_SW          12
 #define VOLTAGE_ADJ_PIN     13
+
+// led on/off states
+uint red_level, green_level, blue_level, white_level;
 
 // adc channels and pins
 #define ADC_VSHUNT          0
@@ -52,6 +59,15 @@ uint8_t spi_cam_read(uint8_t reg);
 // read arducam fifo into buffer, returns -1 on fail
 int spi_cam_read_burst(uint8_t* buf, size_t len);
 
+// callbacks
+bool led_callback(__unused struct repeating_timer *t) {
+
+    white_level = 100 - white_level;
+    pwm_set_gpio_level(WHITE_LED, white_level);
+    return true;
+
+}
+
 int main() {
 
     // initialize hardware
@@ -72,6 +88,21 @@ int main() {
                 if(!strcmp(command, "test")) {
 
                     printf("Hello World!\n");
+
+                } else if(!strcmp(command, "led_test")) {
+
+                    struct repeating_timer timer;
+                    int r = add_repeating_timer_ms(2000, led_callback, NULL, &timer);
+                    if(r) {
+
+                        printf("led is on\n");
+
+                    } else {
+
+                        printf("led timer failed\n");
+
+                    }
+                    // bool cancelled = cancel_repeating_timer(&timer);
 
                 } else if(!strcmp(command, "adc_test")) {
 
@@ -204,11 +235,26 @@ void hw_setup() {
     // gp7 -> Green LED (Active HIGH)
     // gp8 -> Blue LED (Active HIGH)
     // gp9 -> White LED (Active HIGH)
+    for(int i = 6; i < 10; i++) {
+
+        // enable pwm
+        uint pwm_slice = pwm_gpio_to_slice_num(i);
+        uint pwm_chan = pwm_gpio_to_channel(i);
+        pwm_set_wrap(pwm_slice, 255);
+        pwm_set_chan_level(pwm_slice, pwm_chan, 0);
+        pwm_set_enabled(pwm_slice, true);
+
+    }
+    red_level = 0;
+    green_level = 0;
+    blue_level = 0;
+    white_level = 0;
+
     // gp10 -> Constant Current Source (Active HIGH)
     // gp11 -> Discharge Switch (Active HIGH)
     // gp12 -> Constant Voltage Switch (Active LOW)
     // gp13 -> Constant Voltage Adjust Pin (Active LOW)
-    for(int i = 6; i < 14; i++) {
+    for(int i = 10; i < 14; i++) {
 
         gpio_init(i);
         gpio_set_dir(i, GPIO_OUT);
