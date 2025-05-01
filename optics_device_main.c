@@ -6,24 +6,16 @@
 #include "hardware/adc.h"
 #include "hardware/i2c.h"
 #include "hardware/spi.h"
-#include "hardware/pwm.h"
 #include "peripherals/digipot.h"
 #include "peripherals/leds.h"
 #include "peripherals/camera.h"
 #include "peripherals/cell_ctrl.h"
 
 // gpio pins
-#define RED_LED             6
-#define GREEN_LED           7
-#define BLUE_LED            8
-#define WHITE_LED           9
 #define CURRENT_SRC         10
 #define DISCHARGE_SW        11
 #define VOLTAGE_SW          12
 #define VOLTAGE_ADJ_PIN     13
-
-// led on/off states
-uint red_level, green_level, blue_level, white_level;
 
 // adc channels and pins
 #define ADC_VSHUNT          0
@@ -62,8 +54,7 @@ int spi_cam_read_burst(uint8_t* buf, size_t len);
 // callbacks
 bool led_callback(__unused struct repeating_timer *t) {
 
-    white_level = 100 - white_level;
-    pwm_set_gpio_level(WHITE_LED, white_level);
+    hue_shift();
     return true;
 
 }
@@ -92,7 +83,7 @@ int main() {
                 } else if(!strcmp(command, "led_test")) {
 
                     struct repeating_timer timer;
-                    int r = add_repeating_timer_ms(2000, led_callback, NULL, &timer);
+                    int r = add_repeating_timer_ms(20, led_callback, NULL, &timer);
                     if(r) {
 
                         printf("led is on\n");
@@ -152,6 +143,7 @@ int main() {
                 } else if(!strcmp(command, "read_image")) {
 
                     //
+                    printf("unused command\n");
 
                 } else {
 
@@ -228,28 +220,10 @@ void hw_setup() {
 
     // init usb
     stdio_init_all();
-    //setup_default_uart();
+
+    init_leds();
 
     // init gpio
-    // gp6 -> Red LED (Active HIGH)
-    // gp7 -> Green LED (Active HIGH)
-    // gp8 -> Blue LED (Active HIGH)
-    // gp9 -> White LED (Active HIGH)
-    for(int i = 6; i < 10; i++) {
-
-        // enable pwm
-        uint pwm_slice = pwm_gpio_to_slice_num(i);
-        uint pwm_chan = pwm_gpio_to_channel(i);
-        pwm_set_wrap(pwm_slice, 255);
-        pwm_set_chan_level(pwm_slice, pwm_chan, 0);
-        pwm_set_enabled(pwm_slice, true);
-
-    }
-    red_level = 0;
-    green_level = 0;
-    blue_level = 0;
-    white_level = 0;
-
     // gp10 -> Constant Current Source (Active HIGH)
     // gp11 -> Discharge Switch (Active HIGH)
     // gp12 -> Constant Voltage Switch (Active LOW)
