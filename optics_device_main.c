@@ -6,12 +6,12 @@
 #include "hardware/adc.h"
 #include "hardware/i2c.h"
 #include "hardware/spi.h"
+#include "peripherals/digipot.h"
+#include "peripherals/leds.h"
+#include "peripherals/camera.h"
+#include "peripherals/cell_ctrl.h"
 
 // gpio pins
-#define RED_LED             6
-#define GREEN_LED           7
-#define BLUE_LED            8
-#define WHITE_LED           9
 #define CURRENT_SRC         10
 #define DISCHARGE_SW        11
 #define VOLTAGE_SW          12
@@ -25,10 +25,6 @@
 
 // i2c addresses
 #define i2c_cam_addr        0x3C
-#define i2c_discharge0_addr 0x2C
-#define i2c_discharge1_addr 0x2D
-#define i2c_charge1_addr    0x2E
-#define i2c_charge2_addr    0x2F
 
 // spi registers
 #define spi_write_bit       0x80
@@ -55,6 +51,14 @@ uint8_t spi_cam_read(uint8_t reg);
 // read arducam fifo into buffer, returns -1 on fail
 int spi_cam_read_burst(uint8_t* buf, size_t len);
 
+// callbacks
+bool led_callback(__unused struct repeating_timer *t) {
+
+    hue_shift();
+    return true;
+
+}
+
 int main() {
 
     // initialize hardware
@@ -66,7 +70,7 @@ int main() {
         while(1) {
 
             char command[100];
-            absolute_time_t t = make_timeout_time_ms(60 * 60 * 1000);
+            absolute_time_t t = make_timeout_time_ms(15 * 1000);
             sleep_ms(50);
             int r = stdio_get_until(command, 100, t);
             if(r != PICO_ERROR_TIMEOUT) {
@@ -76,8 +80,30 @@ int main() {
 
                     printf("Hello World!\n");
 
-                }
-                if(!strcmp(command, "spi_test")) {
+                } else if(!strcmp(command, "led_test")) {
+
+                    struct repeating_timer timer;
+                    int r = add_repeating_timer_ms(20, led_callback, NULL, &timer);
+                    if(r) {
+
+                        printf("led is on\n");
+
+                    } else {
+
+                        printf("led timer failed\n");
+
+                    }
+                    // bool cancelled = cancel_repeating_timer(&timer);
+
+                } else if(!strcmp(command, "adc_test")) {
+
+                    adc_select_input(0);
+                    uint16_t result0 = adc_read();
+                    adc_select_input(1);
+                    uint16_t result1 = adc_read();
+                    printf("adc0: 0x%03hX, adc1: 0x%03hX\n", result0, result1);
+
+                } else if(!strcmp(command, "spi_test")) {
 
                     // write 0xAA to register 0x00
                     uint8_t x = spi_cam_read(spi_reg_test);
@@ -85,13 +111,47 @@ int main() {
                     uint8_t y = spi_cam_read(spi_reg_test);
                     printf("test reg before: 0x%02hhX, after write: 0x%02hhX\n", x, y);
 
+                } else if(!strcmp(command, "i2c_test")) {
+
+                    // todo
+                    adc_select_input(1);
+                    int ret = digipot_w(i2c_discharge0_bits, 0x01, 0x00);
+                    if(ret) {
+                        printf("|write1 failed|");
+                    }
+                    sleep_ms(500);
+                    uint16_t result = adc_read();
+                    sleep_ms(500);
+                    printf("read1: 0x%03hX, ", result);
+                    ret = digipot_w(i2c_discharge0_bits, 0x01, 0x3F);
+                    if(ret) {
+                        printf("|write2 failed|");
+                    }
+                    sleep_ms(500);
+                    result = adc_read();
+                    sleep_ms(500);
+                    printf("read2: 0x%03hX, ", result);
+                    ret = digipot_w(i2c_discharge0_bits, 0x01, 0x3F >> 1);
+                    if(ret) {
+                        printf("|write3 failed|");
+                    }
+                    sleep_ms(500);
+                    result = adc_read();
+                    sleep_ms(500);
+                    printf("read3: 0x%03hX\n", result);
+
+                } else if(!strcmp(command, "read_image")) {
+
+                    //
+                    printf("unused command\n");
+
+                } else {
+
+                    printf("unrecognized command\n");
+
                 }
 
-            }
-            /*sleep_ms(1000);
-            gpio_put(6, 1);
-            sleep_ms(1000);
-            gpio_put(6, 0);*/
+            } else break;
 
         }
 
@@ -160,28 +220,30 @@ void hw_setup() {
 
     // init usb
     stdio_init_all();
-    //setup_default_uart();
+
+    init_leds();
 
     // init gpio
-    // gp6 -> Red LED (Active HIGH)
-    // gp7 -> Green LED (Active HIGH)
-    // gp8 -> Blue LED (Active HIGH)
-    // gp9 -> White LED (Active HIGH)
     // gp10 -> Constant Current Source (Active HIGH)
     // gp11 -> Discharge Switch (Active HIGH)
     // gp12 -> Constant Voltage Switch (Active LOW)
     // gp13 -> Constant Voltage Adjust Pin (Active LOW)
-    for(int i = 6; i < 14; i++) {
+    for(int i = 10; i < 14; i++) {
 
         gpio_init(i);
         gpio_set_dir(i, GPIO_OUT);
-        if(i < VOLTAGE_SW)
+        if(i < VOLTAGE_SW) {
 
             gpio_put(i, 0);
+            gpio_pull_down(i);
+
+        }
 
     }
     gpio_put(VOLTAGE_SW, 1);
+    gpio_pull_up(VOLTAGE_SW);
     gpio_put(VOLTAGE_ADJ_PIN, 1);
+    gpio_pull_up(VOLTAGE_ADJ_PIN);
 
     // init adc
     // adc0 -> voltage across shunt resistor
