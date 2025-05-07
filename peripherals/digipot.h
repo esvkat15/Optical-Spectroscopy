@@ -7,3 +7,4 @@
 #define i2c_charge2_bits    0x03
 
 int digipot_w(uint8_t adbits, uint8_t command, uint8_t value);
+int digipot_wb(uint8_t adbits, uint8_t command, uint8_t value);

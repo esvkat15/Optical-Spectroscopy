@@ -38,11 +38,16 @@ while true do
     Console.WriteLine "picoack"
     let message = (port.ReadLine ())
     Console.WriteLine message
+    //if message = "picoack" then
     port_command "test" "output/hello.txt"
-    //port_command "spi_test" "output/hello_spi.txt"
+      //port_command "spi_test" "output/hello_spi.txt"
     port_command "i2c_test" "output/hello_i2c.txt"
     port_command "adc_test" "output/hello_adc.txt"
     port_command "led_test" "output/hello_led.txt"
+    //  ()
+    //else
+    //  Console.WriteLine "didn't ack"
+    //  ()
   with
     _ -> Console.WriteLine "no message"
 
