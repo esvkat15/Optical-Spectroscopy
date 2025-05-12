@@ -9,7 +9,9 @@ sudo apt install cmake gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-n
 git clone git@github.com:esvkat15/Optical-Spectroscopy.git
 git clone https://github.com/raspberrypi/pico-sdk.git
 cp pico-sdk/external/pico_sdk_import.cmake Optical-Spectroscopy
-cd Optical-Spectroscopy
+cd pico-sdk
+git submodule update --init
+cd ../Optical-Spectroscopy
 mkdir build
 cd build
 cmake -DPICO_SDK_PATH=../../pico-sdk ..
