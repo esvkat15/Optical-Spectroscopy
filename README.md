@@ -1,16 +1,33 @@
 # Optical-Spectroscopy
 Optical Spectroscopy project code for EECE 490B
 
-* development setup instructions can be found [here](https://www.raspberrypi.com/documentation/microcontrollers/c_sdk.html)
-* look for "getting started" for more detailed instructions
+development setup:
 
-usage instructions:
+open a shell in the folder where u would like to set up the project:
+```bash
+sudo apt install cmake gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib
+git clone git@github.com:esvkat15/Optical-Spectroscopy.git
+git clone https://github.com/raspberrypi/pico-sdk.git
+cp pico-sdk/external/pico_sdk_import.cmake Optical-Spectroscopy
+cd Optical-Spectroscopy
+mkdir build
+cd build
+cmake -DPICO_SDK_PATH=../../pico-sdk ..
+```
 
-// TODO
+development testing:
 
-// add uf2 file for release testing
-
-* hold bootsel button on the pico while plugging it into a USB port
-	* this will open it as a drive
-* drag and drop uf2 file into this drive
-	* the pico will now be running the program
+1. open a shell in the build folder of the project
+```bash
+make
+```
+2. hold the bootsel button on the pico while connecting the USB
+3. copy the .uf2 file from the build folder onto the pico drive
+4. open a shell in the user_interface folder of the project
+```bash
+dotnet run
+```
+or if in WSL
+```bash
+cmd.exe /C """dotnet run"""
+```
