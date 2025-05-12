@@ -8,7 +8,6 @@ open a shell in the folder where u would like to set up the project:
 sudo apt install cmake gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib
 git clone git@github.com:esvkat15/Optical-Spectroscopy.git
 git clone https://github.com/raspberrypi/pico-sdk.git
-cp pico-sdk/external/pico_sdk_import.cmake Optical-Spectroscopy
 cd pico-sdk
 git submodule update --init
 cd ../Optical-Spectroscopy
