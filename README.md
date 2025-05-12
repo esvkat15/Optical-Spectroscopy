@@ -3,7 +3,7 @@ Optical Spectroscopy project code for EECE 490B
 
 development setup:
 
-open a shell in the folder where u would like to set up the project:
+open a shell in the folder where you would like to set up the project:
 ```bash
 sudo apt install cmake gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib
 git clone git@github.com:esvkat15/Optical-Spectroscopy.git
