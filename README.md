@@ -3,7 +3,7 @@ Optical Spectroscopy project code for EECE 490B
 
 development setup:
 
-- install [.NET 8.0](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) for your OS
+- install the [.NET 8.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) for your OS
 - if using windows, you will need WSL2
   - open windows command prompt with admin privileges
   ```cmd
